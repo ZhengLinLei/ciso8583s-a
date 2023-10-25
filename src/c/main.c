@@ -19,7 +19,7 @@
 // Server socket struct
 #define SA struct sockaddr 
 
-#define DEBUG_MODE 0            // Change from 0 to 1 to show debug logs                                    (default: 0)
+#define DEBUG_MODE 1            // Change from 0 to 1 to show debug logs                                    (default: 0)
 #define WARNING_MODE 1          // Change from 0 to 1 to show warning logs during execution                 (default: 1)
 /* 
 Change from 0 to 1 to force disconnection with the client in debugging mode                                 (default: 0)
@@ -35,6 +35,8 @@ In production mode, the client can lose the connection, so it's necessary to che
 // Functions
 int start_server(int port, int max_client);
 int accept_server(int idSocketServer);
+int recv_server(int idSocketClient, char* buffer, int bytes);
+int send_server(int idSocketClient, char* text, int bytes);
 void conn_exit(int idSocket);
 
 
@@ -83,6 +85,24 @@ int accept_server(int idSocketServer) {
     return idSocketClient;
 }
 
+int recv_server(int idSocketClient, char* buffer, int bytes) {
+    int totalBytesReceived = 0;
+    int bytesReceived;
+
+    while (totalBytesReceived < bytes) {
+        bytesReceived = recv(idSocketClient, buffer + totalBytesReceived, bytes - totalBytesReceived, 0);
+
+        if (bytesReceived <= 0) {
+            // Error connection or closed in the otherside
+            return -1;
+        }
+
+        totalBytesReceived += bytesReceived;
+    }
+
+    return totalBytesReceived;
+}
+
 void conn_exit(int idSocket) {
     close(idSocket);
     log_close();
@@ -96,12 +116,16 @@ void conn_exit(int idSocket) {
  *      [ip]   : <ip>  default: 127.0.0.1
  */
 int main(int argc, char *argv[]) {
-    int iRet;
+    int iRet, bypass = 0;
+    pid_t pid;
 
     char ipSocket[16];
     int portSocket;
     // Server
     int idSocketServer, idSocketClient;
+    // Buffer
+    ISO8583 iso8583Message;
+    memset(&iso8583Message, '\0', sizeof(iso8583Message));
 
     // Set ip and port
     memset(ipSocket, '\0', sizeof(16));
@@ -148,15 +172,48 @@ int main(int argc, char *argv[]) {
             conn_exit(idSocketClient);
         }
 
-        // Print client info
-        log_info("New client connected with ID: %d", idSocketClient);
+        if ((pid = fork()) < 0) {
+#if WARNING_MODE == 1
+            log_warning("Error forking, bypassing and forcing parent to execute");
+#endif
+            bypass = 1;
+        }
 
-        log_info("Force disconnection: %d", FORCE_DISCONNECTION);
-        // Close connection
-        close(idSocketClient);
+#if DEBUG_MODE == 1
+        log_debug("PID %d , Bypass %d", pid, bypass);
+#endif
+
+        // Parent
+        if (pid > 0 || bypass == 1) {
+            // Print client info
+            log_info("New client connected with ID: %d", idSocketClient);
+        }
+
+        // Child process but can be bypassed
+        if(pid == 0 || bypass == 1) {
+            while (1) {
+                // Ejemplo: enviar un mensaje al cliente
+                // const char *message = "¡Hola, cliente!\n";
+                // send(idSocketClient, message, strlen(message), 0);
+
+                // Start receiving header (Size of message)
+                recv_server(idSocketClient, iso8583Message.header, ISO8583_HEADER_SIZE);
+
+                // Start receiving MTI
+                recv_server(idSocketClient, iso8583Message.mti, ISO8583_MTI_SIZE);
+                log_debug("Value %d", atoi(iso8583Message.header));
+
+#if PERSISTANCE_CONN != 1
+                // Close connection
+                log_info("Closing client %d", idSocketClient);
+                close(idSocketClient);
+                exit(EXIT_SUCCESS);
+                break;
+#endif
+            }
+        }
     }
 
-    log_info("Closing");
 
     // Close socket
     close(idSocketServer);

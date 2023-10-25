@@ -4,6 +4,7 @@
 // ISO8583 Server message data size
 /*! \brief Header size */
 #define ISO8583_HEADER_SIZE 2
+#define ISO8583_MTI_SIZE 2
 #define ISO8583_P_BITMAP_SIZE 16
 // ================================
 // System environment defines
@@ -26,10 +27,19 @@
 #define DEFAULT_PORT 9101
 #define DEFAULT_IP "127.0.0.1"
 #define MAX_CLIENTS 100
+#define PERSISTANCE_CONN 1
 
 // Error codes
 #define CODE_OK 0
 #define CODE_ERROR_SERVER -1
 #define CODE_ERROR_OPEN_FILE -2
 #define CODE_ERROR_WRITE_FILE -3
+
+// Message
+struct ISO8583_MESSAGE {
+    char header[ISO8583_HEADER_SIZE + 1];
+    char mti[ISO8583_MTI_SIZE + 1];
+    char buffer[COMM_RECEIVE_SIZE_MAX + 1];
+};
+#define ISO8583 struct ISO8583_MESSAGE
 #endif

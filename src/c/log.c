@@ -48,6 +48,12 @@ void log_info(const char* message, ...) {
     va_end(args);
 }
 
+void log_warning(const char* message, ...) {   
+    va_list args;
+    va_start(args, message);
+    log_format("warning", message, args); 
+    va_end(args);
+}
 
 void log_debug(const char* message, ...) {  
     va_list args;

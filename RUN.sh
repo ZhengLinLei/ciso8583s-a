@@ -10,10 +10,10 @@ if [ "$(docker ps -aq -f status=exited -f name=$container_name)" ] || [ "$(docke
 fi
 if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
     echo "Running $container_name"
-    # docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
-    # docker run -d -it --name $container_name -p 9000:9600 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
 
     # For testing purposes (Mac)
-    docker run --rm  -it --name $container_name -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    # docker run --rm  -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
 fi
 docker container exec -it $container_name bash
