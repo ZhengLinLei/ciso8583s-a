@@ -1,0 +1,5 @@
+cd ../
+
+./CLEAN.sh
+
+cd -
