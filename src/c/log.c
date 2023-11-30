@@ -9,10 +9,15 @@
 FILE* LOG_PTR;
 char* LOG_NAME;
 
-void log_start(char* filename) {
-    LOG_PTR = fopen(filename, "w");
-    strcpy(LOG_NAME, filename);
+int log_start(char* filename) {
+    LOG_PTR = fopen(filename, "a");
+    if (LOG_PTR == NULL) 
+        return -1;
+
+    LOG_NAME = filename;
     log_info("Starting log for %s", filename);
+
+    return 0;
 }
 void log_close() {
     log_info("Closing log for %s", LOG_NAME);
@@ -26,6 +31,7 @@ void log_format(const char* tag, const char* message, va_list args) {
     fprintf(LOG_PTR, "%s [%s] ", date, tag);
     vfprintf(LOG_PTR, message, args);
     fprintf(LOG_PTR, "\n");
+    fflush(LOG_PTR);
 }
 
 void log_error(const char* message, ...) {  

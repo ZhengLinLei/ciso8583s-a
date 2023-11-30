@@ -4,7 +4,7 @@
 #define LOG_H
 
 
-void log_start(char* filename);
+int log_start(char* filename);
 void log_close(void);
 void log_format(const char* tag, const char* message, va_list args);
 void log_error(const char* message, ...);

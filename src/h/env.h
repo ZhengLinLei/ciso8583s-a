@@ -8,7 +8,7 @@
 // ================================
 // System environment defines
 /*! \brief Main name */
-#define PROJECT_NAME "Cisco8583"
+#define PROJECT_NAME "Ciso8583"
 /*! \brief Workdir path */
 #define WORKDIR_PATH "/opt/" PROJECT_NAME
 /*! \brief Log file path */
@@ -25,4 +25,11 @@
 // ====
 #define DEFAULT_PORT 9101
 #define DEFAULT_IP "127.0.0.1"
+#define MAX_CLIENTS 100
+
+// Error codes
+#define CODE_OK 0
+#define CODE_ERROR_SERVER -1
+#define CODE_ERROR_OPEN_FILE -2
+#define CODE_ERROR_WRITE_FILE -3
 #endif
