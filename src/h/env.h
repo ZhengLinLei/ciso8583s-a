@@ -4,7 +4,7 @@
 // ISO8583 Server message data size
 /*! \brief Header size */
 #define ISO8583_HEADER_SIZE 2
-#define ISO8583_MTI_SIZE 4
+#define ISO8583_MTI_SIZE 2
 #define ISO8583_P_BITMAP_SIZE 16
 // ================================
 // System environment defines
@@ -42,4 +42,45 @@ struct ISO8583_MESSAGE {
     char buffer[COMM_RECEIVE_SIZE_MAX + 1];
 };
 #define ISO8583 struct ISO8583_MESSAGE
+
+
+
+// ================================
+// Main functions
+/*!
+* \brief Starts the server in the specified port and returns the socket id.
+* \param port (int) - The port where the server will be listening.
+* \param max_client (int) - The maximum number of clients that can be connected at the same time.
+*/
+int start_server(int port, int max_client);
+/*!
+* \brief Accepts a client connection and returns the socket id.
+* \param idSocketServer (int) - The socket id of the server.
+*/
+int accept_server(int idSocketServer);
+/*!
+* \brief Receives a message from the client and returns the number of bytes received.
+* \param idSocketClient (int) - The socket id of the client.
+* \param buffer (char*) - A pointer to a buffer where the message will be stored (Buffer).
+* \param bytes (int) - The number of bytes to receive.
+*/
+int recv_server(int idSocketClient, char* buffer, int bytes);
+/*!
+* \brief Sends a message to the client and returns the number of bytes sent.
+* \param idSocketClient (int) - The socket id of the client.
+* \param text (char*) - A pointer to a string representing the message.
+* \param bytes (int) - The number of bytes to send.
+*/
+int send_server(int idSocketClient, char* text, int bytes);
+/*!
+* \brief Closes the connection and exits the program.
+* \param idSocket (int) - The socket id of the connection.
+*/
+void conn_exit(int idSocket);
+/*!
+* \brief Closes the connection and exits the program.
+* \param idSocket (int) - The socket id of the connection.
+*/
+void client_exit(int idSocket);
+
 #endif

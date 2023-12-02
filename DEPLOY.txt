@@ -1,0 +1,45 @@
+HOW TO DEPLOY THE APPLICATION SERVER?
+-------------------------------------
+
+WITH DOCKER (RECOMMENDED)
+
+    1. Make sure you have installed docker and docker-compose
+
+    2. Execute the following commands:
+        - ./BUILD.sh
+        - ./RUN.sh
+
+    3. To enter the container execute:
+        - docker exec -it ciso8583_ots_a bash
+
+    3. To stop the container execute:
+        - ./STOP.sh
+
+    4. To clean all the environment execute:
+        - ./CLEAN.sh
+
+
+    Notes:
+        - If you are Mac user, you must to change ./RUN.sh file and replace the following line:
+            - docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+            to
+            - docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+
+WITH NATIVE INSTALLATION
+
+    1. Make sure you have installed this dependencies:
+        - gcc
+        - make
+
+    2. Execute the following commands:
+        - make clean
+        - make
+
+    3. The application server will be compiled following path:
+        - ~/dist/ciso8583
+
+    4. Execute the program:
+        - ~/dist/ciso8583
+
+    5. You will see the logs in the following path:
+        - /opt/Ciso8583/logs/Ciso8583.log

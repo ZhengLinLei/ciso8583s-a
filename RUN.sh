@@ -14,6 +14,6 @@ if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
     # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
 
     # For testing purposes (Mac)
-    # docker run --rm  -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
 fi
 docker container exec -it $container_name bash

@@ -1,3 +1,8 @@
+/*!
+*   \file main.c
+*   \brief Main file
+*   \author Zheng Lin Lei
+*/
 #include <stdio.h> 
 #include <netdb.h> 
 #include <netinet/in.h> 
@@ -11,6 +16,7 @@
 
 // Dependencies
 #include "log.h"
+#include "dict.h"
 #include "iso8583.h"
 
 // ENV Defines and CONFIGURATION
@@ -33,15 +39,7 @@ In production mode, the client can lose the connection, so it's necessary to che
 
 
 // Functions
-int start_server(int port, int max_client);
-int accept_server(int idSocketServer);
-int recv_server(int idSocketClient, char* buffer, int bytes);
-int send_server(int idSocketClient, char* text, int bytes);
-int check_mti(char* mti, char** mti_list, size_t len);
-void conn_exit(int idSocket);
-void client_exit(int idSocket);
-
-
+// Definitions in ../h/env.h
 int start_server(int port, int max_client) {
     int idSocketServer;
     struct sockaddr_in address;
@@ -117,15 +115,6 @@ int send_server(int idSocketClient, char* text, int bytes) {
     return bytesSent;
 }
 
-int check_mti(char* mti, char** mti_list, size_t len) {
-    for (size_t i = 0; i < len; ++i) {
-        if (strcmp(mti, mti_list[i]) == 0) {
-            return i;  // Se encontró el MTI en la posición i
-        }
-    }
-    return -1;  // No se encontró el MTI en la lista
-}
-
 void conn_exit(int idSocket) {
     close(idSocket);
     log_close();
@@ -152,9 +141,27 @@ int main(int argc, char *argv[]) {
     int portSocket;
     // Server
     int idSocketServer, idSocketClient;
-    // Buffer
+    // Message struct
     ISO8583 iso8583Message;
     memset(&iso8583Message, '\0', sizeof(iso8583Message));
+
+    // ==================
+    // Buffer print
+    char bufferPrint[COMM_RECEIVE_SIZE_MAX+ 1];
+    memset(bufferPrint, '\0', sizeof(bufferPrint));
+    // Buffer send
+    char bufferSend[COMM_RECEIVE_SIZE_MAX+ 1];
+    memset(bufferSend, '\0', sizeof(bufferSend));
+    int sizeBufferSend;
+    // Buffer pointer
+    char* bufferPointer;
+    // ==================
+    // Dict
+    dict_t **ISO8583_DICT = dictAlloc();
+    addItem(ISO8583_DICT, "1200", ISO8583_1200);
+
+
+    // iso8583_list_alloc(&ISO8583_DICT);
 
     // Set ip and port
     memset(ipSocket, '\0', sizeof(16));
@@ -231,6 +238,8 @@ int main(int argc, char *argv[]) {
                     log_error("Client disconnected receiving HEADER");
                     client_exit(idSocketClient);
                 }
+                // Bytes to int conversion
+                int HEADER = bytesToInt(iso8583Message.header, ISO8583_HEADER_SIZE);
 
                 // Start receiving MTI
                 iRet = recv_server(idSocketClient, iso8583Message.mti, ISO8583_MTI_SIZE);
@@ -238,23 +247,50 @@ int main(int argc, char *argv[]) {
                     log_error("Client disconnected receiving MTI");
                     client_exit(idSocketClient);
                 }
+                char MTI[ISO8583_MTI_SIZE*2 + 1];
+                memset(MTI, '\0', sizeof(MTI));
+                // Bytes to Hex String conversion
+                bytesToHexString(iso8583Message.mti, ISO8583_MTI_SIZE, MTI);
 
                 // Start receiving buffer
-                iRet = recv_server(idSocketClient, iso8583Message.buffer, atoi(iso8583Message.header) - ISO8583_MTI_SIZE);
+                iRet = recv_server(idSocketClient, iso8583Message.buffer, HEADER - ISO8583_MTI_SIZE);
                 if(iRet < 0) {
                     log_error("Client disconnected receiving MESSAGE");
                     client_exit(idSocketClient);
                 }
+                // Bytes to Hex String conversion
+                bytesToHexStringBeauty(iso8583Message.buffer, HEADER - ISO8583_MTI_SIZE, bufferPrint);
 
                 // Printing connection
-                log_info("HEADER: %s", iso8583Message.header);
+                log_info("==================");
+                log_info("Client %d, Header: %d, MTI: %s", idSocketClient, HEADER, MTI);
+                log_info("Message: %s", bufferPrint);
+
                 // Check if this mti exist or it needs response
-                iRet = check_mti(iso8583Message.mti, MTI_LIST, sizeof(MTI_LIST));
+                iRet = check_mti(MTI, MTI_LIST, sizeof(MTI_LIST) / sizeof(MTI_LIST[0]));
+#if DEBUG_MODE == 1
+                log_info("MTI %s, check_mti: %d", MTI, iRet);
+#endif
                 if(iRet >= 0) {
+                    log_info("MTI %s exist in dict", MTI);
                     // The mti exist and need to response client
-                    send_server(idSocketClient, iso8583Message.mti, ISO8583_MTI_SIZE);
+                    bufferPointer = (char *)getItem(*ISO8583_DICT, "1200");
+                    sizeBufferSend = strlen(bufferPointer)/2;
+                    hexStringToBytes(bufferPointer, bufferSend);
+
+                    // Printing response
+                    bytesToHexStringBeauty(bufferSend, sizeBufferSend, bufferPrint);
+                    log_info("Response: %s", bufferPrint);
+
+                    // Send response
+                    send_server(idSocketClient, bufferSend, sizeBufferSend);
+                } else {
+                    // Ommit if mti doesn't exist
+                    log_info("MTI %s doesn't exist in dict, ommiting connection", MTI);
                 }
-                // Ommit if mti doesn't exist
+
+                // End operation
+                log_info("==================");
 
 #if PERSISTANCE_CONN != 1
                 // Close connection

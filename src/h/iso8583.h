@@ -64,6 +64,50 @@ speed in financial transactions. The length of each field and the overall messag
 standard, ensuring consistency and interoperability across different systems and institutions.
 */
 
+#define ISO8583_1200 "007c12007034051908c1080116888880366790225500000000000000057100005023120200523449124d313031303136353430344302862312020003061365443030353020202020202020203030303030303031202020202020202020202020202020000930303630313838383801020000020000001787b59700000000"
+// ...
 
+/*!
+* \brief ISO8583 accepted MTI list and needed to response.
+*/
 extern char* MTI_LIST[10];
+
+/*!
+* \brief Checks if the MTI is in the list and returns the position if it's found, otherwise returns -1.
+* \param mti (char*) - A pointer to a string representing the MTI.
+* \param mti_list (char**) - A pointer to a list of strings representing the MTI list.
+* \param len (size_t) - The length of the MTI list.
+*/
+int check_mti(char* mti, char** mti_list, size_t len);
+
+/*!
+* \brief Convert bytes to int.
+* \param bytes (char*) - Bytes to convert.
+* \param size (int) - Size of bytes.
+* \return (int) - Integer value.
+*/
+int bytesToInt(unsigned char* bytes, int size);
+
+/*!
+* \brief Convert bytes to hex string.
+* \param bytes (char*) - Bytes to convert.
+* \param size (int) - Size of bytes.
+* \param hexString (char*) - Hex string to save (Buffer).
+*/
+void bytesToHexString(unsigned char* bytes, int size, char* hexString);
+
+/*!
+* \brief Convert bytes to hex string with beauty.
+* \param bytes (char*) - Bytes to convert.
+* \param size (int) - Size of bytes.
+* \param hexString (char*) - Hex string to save (Buffer).
+*/
+void bytesToHexStringBeauty(unsigned char* bytes, int size, char* hexString);
+
+/*!
+* \brief Convert hex string to bytes.
+* \param hexString (char*) - Hex string to convert.
+* \param bytes (char*) - Bytes to save (Buffer).
+*/
+void hexStringToBytes(char* hexString, unsigned char* bytes);
 #endif
