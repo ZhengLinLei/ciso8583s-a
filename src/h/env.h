@@ -4,7 +4,7 @@
 // ISO8583 Server message data size
 /*! \brief Header size */
 #define ISO8583_HEADER_SIZE 2
-#define ISO8583_MTI_SIZE 2
+#define ISO8583_MTI_SIZE 4
 #define ISO8583_P_BITMAP_SIZE 16
 // ================================
 // System environment defines

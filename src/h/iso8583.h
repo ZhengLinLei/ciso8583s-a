@@ -65,5 +65,5 @@ standard, ensuring consistency and interoperability across different systems and
 */
 
 
-
+extern char* MTI_LIST[10];
 #endif
