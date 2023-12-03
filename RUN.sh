@@ -13,10 +13,13 @@ if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
 
     if [ "$(uname)" == "Darwin" ]; then
         # For testing purposes (Mac)
-        docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+        echo "Mac OS"
+        docker run -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
     elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-        docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
-        # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+        # For production (Linux)
+        echo "Linux OS"
+        docker run -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+        # docker run -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
     else
         echo "Unsupported OS"
     fi

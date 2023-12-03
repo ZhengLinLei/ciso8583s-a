@@ -27,6 +27,7 @@
 /******************************************************************************/
 
 #include "dl_iso8583.h"
+#include "iso8583.h"
 
 /******************************************************************************/
 
@@ -277,9 +278,7 @@ void DL_ISO8583_MSG_Dump ( FILE                     *iOutFile,
 	DL_UINT16 i;
 	const char     *tmpEOL = _iEolStr == NULL ? "\n" : _iEolStr;
 
-	fprintf(iOutFile,"%s--------------- ISO8583 MSG DUMP ---------------%s",
-			tmpEOL,tmpEOL);
-
+	fprintf(iOutFile,"%s--------------- ISO8583 MSG DUMP ---------------%s", tmpEOL,tmpEOL);
 	/* for each field */
 	for ( i=0 ; i<(iHandler->fieldItems) ; i++ )
 	{
@@ -287,9 +286,15 @@ void DL_ISO8583_MSG_Dump ( FILE                     *iOutFile,
 		{
 			DL_ISO8583_FIELD_DEF *fieldDef = DL_ISO8583_GetFieldDef(i,iHandler);
 
-			fprintf(iOutFile,"[%03d] ",
-					(int)i);
-			fprintf(iOutFile,"[%s]%s",iMsg->field[i].ptr,tmpEOL);
+
+			fprintf(iOutFile,"[%03d] (%03d) [%s]%s", (int)i, (int)iMsg->field[i].len, iMsg->field[i].ptr,tmpEOL);
+			// // Show in hex
+			// fprintf(iOutFile,"%12s[", "");
+			// // Print until \0 or len
+			// for (int j = 0; j < iMsg->field[i].len; j++) {
+			// 	fprintf(iOutFile,"%02X", iMsg->field[i].ptr[j]);
+			// }
+			// fprintf(iOutFile,"]%s", tmpEOL);
 		}
 
 	} /* end-for(i) */

@@ -27,7 +27,7 @@
 // Server socket struct
 #define SA struct sockaddr 
 
-#define DEBUG_MODE 1            // Change from 0 to 1 to show debug logs                                    (default: 0)
+#define DEBUG_MODE 0            // Change from 0 to 1 to show debug logs                                    (default: 0)
 #define WARNING_MODE 1          // Change from 0 to 1 to show warning logs during execution                 (default: 1)
 /* 
 Change from 0 to 1 to force disconnection with the client in debugging mode                                 (default: 0)
@@ -275,17 +275,19 @@ int main(int argc, char *argv[]) {
                 // Bytes to Hex String conversion
                 bytesToHexStringBeauty(iso8583Message.buffer, BUFFER_SIZE, bufferPrint);
 
-                log_info("Client %d, Header: %d, MTI: %s, Data: (%d|%d),", idSocketClient, HEADER, MTI, BUFFER_SIZE, iRet);
-                log_info("Message: %s", bufferPrint);
+                log_debug("Client %d, Header: %d, MTI: %s, Data: (%d|%d),", idSocketClient, HEADER, MTI, BUFFER_SIZE, iRet);
+                log_debug("Message: %s", bufferPrint);
 #endif
 
                 // Check if this mti exist or it needs response
                 iRet = check_mti(MTI, MTI_LIST, sizeof(MTI_LIST) / sizeof(MTI_LIST[0]));
 #if DEBUG_MODE == 1
-                log_info("MTI %s, check_mti: %d", MTI, iRet);
+                log_debug("MTI %s, check_mti: %d", MTI, iRet);
 #endif
                 if(iRet >= 0) {
                     log_info("MTI %s exist in dict", MTI);
+                    log_info("Packed size: %d", HEADER);
+
 
                     // Create response
                     DL_ISO8583_MSG_Init(NULL,0,&isoMsg);
@@ -303,7 +305,7 @@ int main(int argc, char *argv[]) {
                     // Bytes to Hex String conversion
                     bytesToHexStringBeauty((char *)&iso8583Interface, HEADER, bufferPrint);
                     
-                    log_info("Interface: %s", bufferPrint);
+                    log_debug("Interface: %s", bufferPrint);
 #endif
                     // Get size of message
                     packedSize = sizeof(packBuf); // packBufPtr pointing ---> iso8583Interface
@@ -340,7 +342,7 @@ int main(int argc, char *argv[]) {
 #if DEBUG_MODE == 1
                     // Bytes to Hex String conversion
                     bytesToHexStringBeauty((char *)packBuf, packedSize + ISO8583_HEADER_SIZE, bufferPrint);
-                    log_info("Response: %s", bufferPrint);
+                    log_debug("Response: %s", bufferPrint);
 #endif
                     // Response
                     send_server(idSocketClient, packBuf, packedSize + ISO8583_HEADER_SIZE);
