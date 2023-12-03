@@ -14,4 +14,6 @@ docker volume create ciso8583_ots_a_logs
 
 rm -rf tmp
 
+yes | docker image prune
+
 echo "---- Build finished ---"
