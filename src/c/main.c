@@ -16,8 +16,10 @@
 
 // Dependencies
 #include "log.h"
-#include "dict.h"
 #include "iso8583.h"
+#include "dl_iso8583.h"
+#include "dl_iso8583_defs_1993.h"
+#include "dl_iso8583_common.h"
 
 // ENV Defines and CONFIGURATION
 #include "env.h"
@@ -25,7 +27,7 @@
 // Server socket struct
 #define SA struct sockaddr 
 
-#define DEBUG_MODE 0            // Change from 0 to 1 to show debug logs                                    (default: 0)
+#define DEBUG_MODE 1            // Change from 0 to 1 to show debug logs                                    (default: 0)
 #define WARNING_MODE 1          // Change from 0 to 1 to show warning logs during execution                 (default: 1)
 /* 
 Change from 0 to 1 to force disconnection with the client in debugging mode                                 (default: 0)
@@ -145,23 +147,27 @@ int main(int argc, char *argv[]) {
     ISO8583 iso8583Message;
     memset(&iso8583Message, '\0', sizeof(iso8583Message));
 
+    ISO8583_INTERFACE iso8583Interface;
+    memset(&iso8583Interface, '\0', sizeof(iso8583Interface));
+
     // ==================
     // Buffer print
     char bufferPrint[COMM_RECEIVE_SIZE_MAX+ 1];
     memset(bufferPrint, '\0', sizeof(bufferPrint));
     // Buffer send
-    char bufferSend[COMM_RECEIVE_SIZE_MAX+ 1];
-    memset(bufferSend, '\0', sizeof(bufferSend));
-    int sizeBufferSend;
-    // Buffer pointer
-    char* bufferPointer;
-    // ==================
-    // Dict
-    dict_t **ISO8583_DICT = dictAlloc();
-    addItem(ISO8583_DICT, "1200", ISO8583_1200);
+    DL_ISO8583_HANDLER isoHandler;
+	DL_ISO8583_MSG     isoMsg;
+	DL_UINT8           packBuf[sizeof(iso8583Interface)];
+	DL_UINT16          packedSize;
 
+    memset(packBuf, '\0', sizeof(packBuf));
 
-    // iso8583_list_alloc(&ISO8583_DICT);
+    /* 
+     * get ISO-8583 1993 handler 
+     * Using 1993 version because it's the most used and standarisated
+     */
+	DL_ISO8583_DEFS_1993_GetHandler(&isoHandler);
+
 
     // Set ip and port
     memset(ipSocket, '\0', sizeof(16));
@@ -249,22 +255,29 @@ int main(int argc, char *argv[]) {
                 }
                 char MTI[ISO8583_MTI_SIZE*2 + 1];
                 memset(MTI, '\0', sizeof(MTI));
+
                 // Bytes to Hex String conversion
                 bytesToHexString(iso8583Message.mti, ISO8583_MTI_SIZE, MTI);
 
                 // Start receiving buffer
-                iRet = recv_server(idSocketClient, iso8583Message.buffer, HEADER - ISO8583_MTI_SIZE);
+                // Data size = HEADER - ISO8583_MTI_SIZE
+                int BUFFER_SIZE = HEADER - ISO8583_MTI_SIZE; 
+                iRet = recv_server(idSocketClient, iso8583Message.buffer, BUFFER_SIZE);
                 if(iRet < 0) {
                     log_error("Client disconnected receiving MESSAGE");
                     client_exit(idSocketClient);
                 }
-                // Bytes to Hex String conversion
-                bytesToHexStringBeauty(iso8583Message.buffer, HEADER - ISO8583_MTI_SIZE, bufferPrint);
-
+                
                 // Printing connection
                 log_info("==================");
-                log_info("Client %d, Header: %d, MTI: %s", idSocketClient, HEADER, MTI);
+
+#if DEBUG_MODE == 1
+                // Bytes to Hex String conversion
+                bytesToHexStringBeauty(iso8583Message.buffer, BUFFER_SIZE, bufferPrint);
+
+                log_info("Client %d, Header: %d, MTI: %s, Data: (%d|%d),", idSocketClient, HEADER, MTI, BUFFER_SIZE, iRet);
                 log_info("Message: %s", bufferPrint);
+#endif
 
                 // Check if this mti exist or it needs response
                 iRet = check_mti(MTI, MTI_LIST, sizeof(MTI_LIST) / sizeof(MTI_LIST[0]));
@@ -273,17 +286,64 @@ int main(int argc, char *argv[]) {
 #endif
                 if(iRet >= 0) {
                     log_info("MTI %s exist in dict", MTI);
-                    // The mti exist and need to response client
-                    bufferPointer = (char *)getItem(*ISO8583_DICT, "1200");
-                    sizeBufferSend = strlen(bufferPointer)/2;
-                    hexStringToBytes(bufferPointer, bufferSend);
 
-                    // Printing response
-                    bytesToHexStringBeauty(bufferSend, sizeBufferSend, bufferPrint);
+                    // Create response
+                    DL_ISO8583_MSG_Init(NULL,0,&isoMsg);
+
+                    /*
+                    *   Copy struct to interface
+                    *   This is necessary because the library uses a different struct to manage the message
+                    *   Struct has got header[ISO8583_HEADER_SIZE + 1] and mti[ISO8583_MTI_SIZE + 1] but interface
+                    *   has got header[ISO8583_HEADER_SIZE] and mti[ISO8583_MTI_SIZE]
+                    */
+                    memcpy(iso8583Interface.mti, iso8583Message.mti, ISO8583_MTI_SIZE);
+                    memcpy(iso8583Interface.buffer, iso8583Message.buffer, BUFFER_SIZE);
+
+#if DEBUG_MODE == 1
+                    // Bytes to Hex String conversion
+                    bytesToHexStringBeauty((char *)&iso8583Interface, HEADER, bufferPrint);
+                    
+                    log_info("Interface: %s", bufferPrint);
+#endif
+                    // Get size of message
+                    packedSize = sizeof(packBuf); // packBufPtr pointing ---> iso8583Interface
+                    log_info("Requesting message with MTI %s", MTI);
+                    /* unpack ISO message according to documentation */
+	                (void)DL_ISO8583_MSG_Unpack(&isoHandler, (DL_UINT8 *)&iso8583Interface, packedSize, &isoMsg);
+
+                    /* output ISO message content */
+                    DL_ISO8583_MSG_Dump(LOG_PTR, NULL, &isoHandler, &isoMsg);
+
+                    /*
+                    * Operate with ISO8583 message
+                    */
+                    fillWithMTI(MTI, &isoMsg);
+                    // memset(&isoMsg.field[2], '\0', sizeof(DL_ISO8583_MSG_FIELD));
+
+                    log_info("Responding message with MTI %s", isoMsg.field[0].ptr);
+                    DL_ISO8583_MSG_Dump(LOG_PTR, NULL, &isoHandler, &isoMsg);
+
+                    // Packing message
+                    memset(packBuf, '\0', sizeof(packBuf));
+                    memset(&iso8583Interface, '\0', sizeof(iso8583Interface));
+                    (void)DL_ISO8583_MSG_Pack(&isoHandler, &isoMsg, (DL_UINT8 *)&iso8583Interface, &packedSize);
+
+                    log_info("Packed size: %d", packedSize);
+                    // Add header = packedSize 2bytes in packBuf
+                    intTo2Bytes(packedSize, packBuf, ISO8583_HEADER_SIZE);
+                    // Add buffer = iso8583Interface in packbuf
+                    memcpy(packBuf + ISO8583_HEADER_SIZE, &iso8583Interface, packedSize);
+
+                    /* free ISO message */
+                    DL_ISO8583_MSG_Free(&isoMsg);
+
+#if DEBUG_MODE == 1
+                    // Bytes to Hex String conversion
+                    bytesToHexStringBeauty((char *)packBuf, packedSize + ISO8583_HEADER_SIZE, bufferPrint);
                     log_info("Response: %s", bufferPrint);
-
-                    // Send response
-                    send_server(idSocketClient, bufferSend, sizeBufferSend);
+#endif
+                    // Response
+                    send_server(idSocketClient, packBuf, packedSize + ISO8583_HEADER_SIZE);
                 } else {
                     // Ommit if mti doesn't exist
                     log_info("MTI %s doesn't exist in dict, ommiting connection", MTI);

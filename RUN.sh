@@ -10,10 +10,15 @@ if [ "$(docker ps -aq -f status=exited -f name=$container_name)" ] || [ "$(docke
 fi
 if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
     echo "Running $container_name"
-    docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
-    # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
 
-    # For testing purposes (Mac)
-    # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    if [ "$(uname)" == "Darwin" ]; then
+        # For testing purposes (Mac)
+        docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+        docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+        # docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+    else
+        echo "Unsupported OS"
+    fi
 fi
 docker container exec -it $container_name bash

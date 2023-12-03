@@ -22,7 +22,7 @@
 /*! \brief Max communication size */
 #define COMM_MAX_SIZE 2
 /*! \brief Max communication size in byte */
-#define COMM_RECEIVE_SIZE_MAX COMM_MAX_SIZE + 1024
+#define COMM_RECEIVE_SIZE_MAX COMM_MAX_SIZE * 1024
 // ====
 #define DEFAULT_PORT 9101
 #define DEFAULT_IP "127.0.0.1"
@@ -41,7 +41,12 @@ struct ISO8583_MESSAGE {
     char mti[ISO8583_MTI_SIZE + 1];
     char buffer[COMM_RECEIVE_SIZE_MAX + 1];
 };
+struct ISO8583_MESSAGE_INTERFACE {
+    char mti[ISO8583_MTI_SIZE];
+    char buffer[COMM_RECEIVE_SIZE_MAX];
+};
 #define ISO8583 struct ISO8583_MESSAGE
+#define ISO8583_INTERFACE struct ISO8583_MESSAGE_INTERFACE
 
 
 

@@ -13,7 +13,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 # Name of project
 TARGET = $(DIST_DIR)/ciso8583
 
-# Compiler and options flag
+# Compiler and options flag "no warning"
 CC = gcc
 CFLAGS = -I$(INC_DIR)
 
