@@ -1,6 +1,8 @@
 #ifndef ISO8583_H
 #define ISO8583_H
 
+#include "dl_iso8583_common.h"
+
 /*
 ISO 8583  is an international standard  for financial transaction  card-originated  interchange  messaging.
 It defines a messaging format and a communication flow for financial transactions between various entities,
@@ -64,13 +66,26 @@ speed in financial transactions. The length of each field and the overall messag
 standard, ensuring consistency and interoperability across different systems and institutions.
 */
 
-#define ISO8583_1200 "007c12007034051908c1080116888880366790225500000000000000057100005023120200523449124d313031303136353430344302862312020003061365443030353020202020202020203030303030303031202020202020202020202020202020000930303630313838383801020000020000001787b59700000000"
 // ...
 
 /*!
 * \brief ISO8583 accepted MTI list and needed to response.
 */
 extern char* MTI_LIST[10];
+
+/*!
+* \brief Foreach loop
+*/
+#define foreach(item, array) \
+    for(int keep = 1, \
+            count = 0,\
+            size = sizeof (array) / sizeof *(array); \
+        keep && count != size; \
+        keep = !keep, count++) \
+      for(item = (array) + count; keep; keep = !keep)
+
+
+#define SIZE_P11        6
 
 /*!
 * \brief Checks if the MTI is in the list and returns the position if it's found, otherwise returns -1.
@@ -87,6 +102,24 @@ int check_mti(char* mti, char** mti_list, size_t len);
 * \return (int) - Integer value.
 */
 int bytesToInt(unsigned char* bytes, int size);
+
+/*!
+* \brief Convert int to bytes.
+* \param value (int) - Integer value to convert.
+* \param bytes (char*) - Bytes to save (Buffer).
+* \param size (int) - Size of bytes.
+* \example (int)0x6665 -> (char*)0x6566
+*/
+void intTo2Bytes(int value, unsigned char* bytes, int size);
+
+/*!
+* \brief Convert int to bytes reverse
+* \param value (int) - Integer value to convert.
+* \param bytes (char*) - Bytes to save (Buffer).
+* \param size (int) - Size of bytes.
+* \example (int)0x6665 -> (char*)0x6665
+*/
+void intTo2BytesReverse(int value, unsigned char* bytes, int size);
 
 /*!
 * \brief Convert bytes to hex string.
@@ -110,4 +143,12 @@ void bytesToHexStringBeauty(unsigned char* bytes, int size, char* hexString);
 * \param bytes (char*) - Bytes to save (Buffer).
 */
 void hexStringToBytes(char* hexString, unsigned char* bytes);
+
+/*!
+* \brief Fill the ISO8583 Msg dictionary with different MTI
+* \param mti (char*) - MTI to compare.
+* \param bytes (unsigned char*) - Bytes to fill.
+*/
+void fillWithMTI(char* mti, DL_ISO8583_MSG* bytes);
+
 #endif
