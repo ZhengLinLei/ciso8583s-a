@@ -137,6 +137,22 @@ WITH NATIVE INSTALLATION
 
     5. You will see the logs in the following path:
         - /opt/Ciso8583/logs/Ciso8583.log
+
+
+
+To execute with PODMAN, you only need to add podman as argument of any script. For example:
+
+    ./BUILD.sh podman
+
+----------
+
+To execute all scripts with PODMAN, you can use the following command:
+
+    ./BUILD.sh podman && ./RUN.sh podman && ./STOP.sh podman
+
+----------
+
+By default if you don't specify any argument, the scripts will use docker as container engine.
 ```
 
 ## Contributing

@@ -1,12 +1,38 @@
 # Run container cis08583_ots_a end expose all ports with --netword=host
 container_name=ciso8583_ots_a
 
+# Check if $1 is "podman" or "docker" then use it
+if [ "$1" == "podman" ]; then
+    DOCKER=podman
+    podman --version || {
+        echo "Error: podman not found"
+        exit 1
+    }
+else
+    DOCKER=docker
+    docker --version || {
+        echo "Error: docker not found"
+        exit 1
+    }
+fi
+
 # Add custom flags
 flag=
-if [ "$#" -eq 1 ]; then
-    flag=$1
-    echo "Flags: $flag"
-fi
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -d)
+            flag="$flag $1"
+            echo "Running in detached mode"
+            ;;
+        --rm)
+            flag="$flag $1"
+            echo "Removing container after exit"
+            ;;
+    esac
+    shift
+done
+echo "Flags: $flag"
+
 
 # Execute
 if [ "$(docker ps -aq -f status=exited -f name=$container_name)" ] || [ "$(docker ps -aq -f status=created -f name=$container_name)" ]; then

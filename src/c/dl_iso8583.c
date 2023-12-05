@@ -239,7 +239,7 @@ DL_ERR DL_ISO8583_MSG_Unpack ( const DL_ISO8583_HANDLER *iHandler,
 	int        haveBitmap  = 0;
 
 	/* unpack all fields until we've encountered a bitmap field */
-	while ( !err && (curFieldIdx < maxFieldIdx) && (curPtr < endPtr) && !haveBitmap )
+	while ( !err && (curFieldIdx <= maxFieldIdx) && (curPtr < endPtr) && !haveBitmap )
 	{
 		err = _DL_ISO8583_FIELD_Unpack(curFieldIdx,ioMsg,iHandler,&curPtr);
 
@@ -251,7 +251,7 @@ DL_ERR DL_ISO8583_MSG_Unpack ( const DL_ISO8583_HANDLER *iHandler,
 	} /* end-while */
 
 	/* unpack only present fields (if any) after bitmap field */
-	while ( !err && (curFieldIdx < maxFieldIdx) && (curPtr < endPtr) )
+	while ( !err && (curFieldIdx <= maxFieldIdx) && (curPtr < endPtr) )
 	{
 		if ( 0 != ioMsg->field[curFieldIdx].len ) /* present */
 		{
