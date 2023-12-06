@@ -10,4 +10,10 @@ To execute all scripts with PODMAN, you can use the following command:
 
 ----------
 
+To execute all scripts with PODMAN in DETACH mode (Background):
+
+    ./BUILD.sh podman && ./RUN.sh podman -d && ./STOP.sh podman
+
+---------
+
 By default if you don't specify any argument, the scripts will use docker as container engine.

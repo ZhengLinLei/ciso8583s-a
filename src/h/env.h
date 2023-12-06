@@ -30,10 +30,11 @@
 #define PERSISTANCE_CONN 1
 
 // Error codes
-#define CODE_OK 0
-#define CODE_ERROR_SERVER -1
-#define CODE_ERROR_OPEN_FILE -2
-#define CODE_ERROR_WRITE_FILE -3
+#define CODE_OK                      0
+#define CODE_ERROR_SERVER           -1
+#define CODE_ERROR_OPEN_FILE        -2
+#define CODE_ERROR_WRITE_FILE       -3
+#define CODE_ERROR_ARGUMENTS        -4
 
 // Message
 struct ISO8583_MESSAGE {

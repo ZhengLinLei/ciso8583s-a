@@ -18,6 +18,11 @@ WITH DOCKER (RECOMMENDED)
     4. To clean all the environment execute:
         - ./CLEAN.sh
 
+    
+    Custom:
+        * If you want to run the program with docker or podman in DETACH mode, you only have to execute the following command:
+            - ./RUN.sh -d
+
 
     Notes:
         - If you are Mac user, you must to change ./RUN.sh file and replace the following line:

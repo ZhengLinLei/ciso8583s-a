@@ -168,6 +168,36 @@ int main(int argc, char *argv[]) {
      */
 	DL_ISO8583_DEFS_1993_GetHandler(&isoHandler);
 
+    // Start logging
+    // If argument flag -o exist use it, if not use default LOG_FILENAME
+    int customLog = 0;
+    int totalArgc = argc;
+    for (int i = 1; i < totalArgc; i++) {
+        // Check for flags
+        if (strcmp(argv[i], "-o") == 0 || strcmp(argv[i], "--output") == 0) {
+            // Check if there is another argument after the flag
+            if (i + 1 < argc && argv[i + 1][0] != '-') {
+                // Set custom log
+                customLog = 1;
+                iRet = log_start(argv[i + 1]);
+                i++;  // Skip the next argument (the filename)
+
+                // Remove two indexes to avoid using incorrect arguments
+                argc -= 2;
+            } else {
+                fprintf(stderr, "Error: Flag %s requires a filename.\n", argv[i]);
+                return CODE_ERROR_ARGUMENTS;
+            }
+        }
+    }
+    // If there is no custom log, use default
+    if (customLog == 0)
+        iRet = log_start(LOG_FILENAME);
+
+    if (iRet < 0) {
+        fprintf(stderr, "Error LOGOPEN\n");
+        return CODE_ERROR_OPEN_FILE;
+    }
 
     // Set ip and port
     memset(ipSocket, '\0', sizeof(16));
@@ -180,14 +210,6 @@ int main(int argc, char *argv[]) {
         portSocket = atoi(argv[1]);
     if (argc >= 3)
         strcpy(ipSocket, argv[2]);
-
-    // Start logging
-    iRet = log_start(LOG_FILENAME);
-
-    if (iRet < 0) {
-        fprintf(stderr, "Error LOGOPEN\n");
-        return CODE_ERROR_OPEN_FILE;
-    }
 
     // Wake up message
     log_info("Starting socket server in port %d", portSocket);

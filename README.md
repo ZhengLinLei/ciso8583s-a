@@ -28,8 +28,9 @@
 - [Table of Contents](#table-of-contents)
 - [About the Project](#about-the-project)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Usage](#usage)
 - [Contributing](#contributing)
 
 ## About the Project
@@ -112,6 +113,11 @@ WITH DOCKER (RECOMMENDED)
     4. To clean all the environment execute:
         - ./CLEAN.sh
 
+    
+    Custom:
+        * If you want to run the program with docker or podman in DETACH mode, you only have to execute the following command:
+            - ./RUN.sh -d
+
 
     Notes:
         - If you are Mac user, you must to change ./RUN.sh file and replace the following line:
@@ -152,7 +158,30 @@ To execute all scripts with PODMAN, you can use the following command:
 
 ----------
 
+To execute all scripts with PODMAN in DETACH mode (Background):
+
+    ./BUILD.sh podman && ./RUN.sh podman -d && ./STOP.sh podman
+
+---------
+
 By default if you don't specify any argument, the scripts will use docker as container engine.
+```
+
+### Usage
+
+To execute the program manually you can invoke the following command:
+```log
+./ciso8583
+```
+
+To add custom port and ip:
+```log
+./ciso8583 9101 0.0.0.0 
+```
+
+To add custom logfile:
+```log
+./ciso8583 -o /opt/custom/logs/PARTY.log
 ```
 
 ## Contributing
