@@ -1,0 +1,18 @@
+[info] Testing with [150 trx/s] Transaction per seconds
+[info] RAM: 16GB
+       Core: 8
+
+-------
+Total transaction          = 7999
+Transactions/seconds       = 15.2517
+Total Time                 = 480.674000 s
+-------
+Saturation                 = 98%
+Total Time                 = 242.452000 s
+------
+Sent                       = 7999
+Attended                   = 6798
+Unattended                 = 1201
+Timeout                    = 0
+Approved                   = 6798
+Denied                     = 0

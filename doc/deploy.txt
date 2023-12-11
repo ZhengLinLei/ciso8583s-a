@@ -1,0 +1,124 @@
+--- Installation
+
+HOW TO DEPLOY THE APPLICATION SERVER?
+
+WITH DOCKER (RECOMMENDED)
+
+    1. Make sure you have installed docker and docker-compose
+
+    2. Execute the following commands:
+        - cd ./script
+        - ./BUILD.sh
+        - ./RUN.sh
+
+    3. To enter the container execute:
+        - docker exec -it ciso8583_ots_a bash
+
+    3. To stop the container execute:
+        - ./STOP.sh
+
+    4. To clean all the environment execute:
+        - ./CLEAN.sh
+
+    
+    Custom:
+        * If you want to run the program with docker or podman in DETACH mode, you only have to execute the following command:
+            - ./RUN.sh -d
+
+        * To add any other DOCKER flags:
+            - ./RUN.sh -d --rm
+
+
+    Notes:
+        - If you are Mac user, you must to change ./RUN.sh file and replace the following line:
+            - docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+            to
+            - docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+
+
+
+WITH PODMAN:
+
+To use PODMAN in production follow these steps to import and run container:
+
+    1. In local machine:
+
+        1.1 BUILD (./BUILD.sh <path-export-image>):  
+            
+            - ./BUILD.sh ./dist/ciso8583_ots_a.tgz
+
+            Or manually with (After docker build):
+
+            - docker image save ciso8583_ots_a | gzip > ./dist/ciso8583_ots_a.tgz
+
+        1.2 UPLOAD:
+
+            Upload the image to production
+
+    2. In remote machine:
+
+        1.2 GZIP && RUN (./PODMAN.sh <path-import-image>):
+
+            - cd dist
+            - ./PODMAN.sh ./dist/ciso8583_ots_a.tgz
+        
+            Or manually with:
+
+            - cd dist
+            - gzip -d ./ciso8583_ots_a.tgz
+            - ./STOP.sh podman
+            - podman image rm ciso8583_ots_a
+            - podman image load -i ./ciso8583_ots_a.tar
+            - podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
+
+
+
+WITH NATIVE INSTALLATION
+
+    1. Make sure you have installed this dependencies:
+        - gcc
+        - make
+
+    2. Execute the following commands:
+        - make clean
+        - make
+
+    3. The application server will be compiled following path:
+        - ~/dist/ciso8583
+
+    4. Execute the program:
+        - ~/dist/ciso8583
+
+    5. You will see the logs in the following path:
+        - /opt/Ciso8583/logs/Ciso8583.log
+
+
+
+---------------------------------
+
+--- Usage
+
+To execute the program manually you can invoke the following command:
+
+./ciso8583
+
+--
+
+To add custom port and ip:
+
+./ciso8583 9101 0.0.0.0 
+
+--
+
+To add custom logfile:
+
+./ciso8583 -o /opt/custom/logs/PARTY.log
+
+
+
+---------------------------------
+
+
+If you want to export directly to production or you want to execute the server in localhost, call script:
+
+    - ./RUNALL.sh
