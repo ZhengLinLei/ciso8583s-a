@@ -2,6 +2,9 @@ dist/ciso8583
 build/*.o
 tmp
 
+*.tgz
+*.tar
+
 .DS_Store
 
 test.log

@@ -6,6 +6,7 @@ WITH DOCKER (RECOMMENDED)
     1. Make sure you have installed docker and docker-compose
 
     2. Execute the following commands:
+        - cd ./script
         - ./BUILD.sh
         - ./RUN.sh
 
@@ -23,12 +24,24 @@ WITH DOCKER (RECOMMENDED)
         * If you want to run the program with docker or podman in DETACH mode, you only have to execute the following command:
             - ./RUN.sh -d
 
+        * To add any other DOCKER flags:
+            - ./RUN.sh -d --rm
+
 
     Notes:
         - If you are Mac user, you must to change ./RUN.sh file and replace the following line:
             - docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
             to
             - docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+
+
+
+
+WITH PODMAN:
+
+    1. READ THE DOC PODMAN.txt
+
+
 
 WITH NATIVE INSTALLATION
 

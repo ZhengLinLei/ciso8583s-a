@@ -92,7 +92,6 @@ HEADER: 007c -> 124 bytes
 
 ### Installation
 
-```log
 HOW TO DEPLOY THE APPLICATION SERVER?
 -------------------------------------
 
@@ -101,6 +100,7 @@ WITH DOCKER (RECOMMENDED)
     1. Make sure you have installed docker and docker-compose
 
     2. Execute the following commands:
+        - cd ./script
         - ./BUILD.sh
         - ./RUN.sh
 
@@ -118,12 +118,53 @@ WITH DOCKER (RECOMMENDED)
         * If you want to run the program with docker or podman in DETACH mode, you only have to execute the following command:
             - ./RUN.sh -d
 
+        * To add any other DOCKER flags:
+            - ./RUN.sh -d --rm
+
 
     Notes:
         - If you are Mac user, you must to change ./RUN.sh file and replace the following line:
             - docker run -d -it --name $container_name --network=host -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
             to
             - docker run -d -it --name $container_name -p 9101:9101 -v ciso8583_ots_a_logs:/opt/Ciso8583/log $container_name
+
+
+
+WITH PODMAN:
+
+    To use PODMAN in production follow these steps to import and run container:
+
+    1. In local machine:
+
+        1.1 BUILD (./BUILD.sh <path-export-image>):  
+            
+            - ./BUILD.sh ./dist/ciso8583_ots_a.tgz
+
+            Or manually with (After docker build):
+
+            - docker image save ciso8583_ots_a | gzip > ./dist/ciso8583_ots_a.tgz
+
+        1.2 UPLOAD:
+
+            Upload the image to production
+
+    2. In remote machine:
+
+        1.2 GZIP && RUN (./PODMAN.sh <path-import-image>):
+
+            - cd dist
+            - ./PODMAN.sh ./dist/ciso8583_ots_a.tgz
+        
+            Or manually with:
+
+            - cd dist
+            - gzip -d ./ciso8583_ots_a.tgz
+            - ./STOP.sh podman
+            - podman image rm ciso8583_ots_a
+            - podman image load -i ./ciso8583_ots_a.tar
+            - podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
+
+
 
 WITH NATIVE INSTALLATION
 
@@ -144,28 +185,6 @@ WITH NATIVE INSTALLATION
     5. You will see the logs in the following path:
         - /opt/Ciso8583/logs/Ciso8583.log
 
-
-
-To execute with PODMAN, you only need to add podman as argument of any script. For example:
-
-    ./BUILD.sh podman
-
-----------
-
-To execute all scripts with PODMAN, you can use the following command:
-
-    ./BUILD.sh podman && ./RUN.sh podman && ./STOP.sh podman
-
-----------
-
-To execute all scripts with PODMAN in DETACH mode (Background):
-
-    ./BUILD.sh podman && ./RUN.sh podman -d && ./STOP.sh podman
-
----------
-
-By default if you don't specify any argument, the scripts will use docker as container engine.
-```
 
 ### Usage
 

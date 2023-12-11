@@ -1,19 +1,32 @@
-To execute with PODMAN, you only need to add podman as argument of any script. For example:
+To use PODMAN in production follow these steps to import and run container:
 
-    ./BUILD.sh podman
+    1. In local machine:
 
-----------
+        1.1 BUILD (./BUILD.sh <path-export-image>):  
+            
+            - ./BUILD.sh ./dist/ciso8583_ots_a.tgz
 
-To execute all scripts with PODMAN, you can use the following command:
+            Or manually with (After docker build):
 
-    ./BUILD.sh podman && ./RUN.sh podman && ./STOP.sh podman
+            - docker image save ciso8583_ots_a | gzip > ./dist/ciso8583_ots_a.tgz
 
-----------
+        1.2 UPLOAD:
 
-To execute all scripts with PODMAN in DETACH mode (Background):
+            Upload the image to production
 
-    ./BUILD.sh podman && ./RUN.sh podman -d && ./STOP.sh podman
+    2. In remote machine:
 
----------
+        1.2 GZIP && RUN (./PODMAN.sh <path-import-image>):
 
-By default if you don't specify any argument, the scripts will use docker as container engine.
+            - cd dist
+            - ./PODMAN.sh ./dist/ciso8583_ots_a.tgz
+        
+            Or manually with:
+
+            - cd dist
+            - gzip -d ./ciso8583_ots_a.tgz
+            - ./STOP.sh podman
+            - podman image rm ciso8583_ots_a
+            - podman image load -i ./ciso8583_ots_a.tar
+            - podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
+
