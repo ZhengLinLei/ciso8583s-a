@@ -1,20 +1,7 @@
+cd ../
+
 # Run container cis08583_ots_a end expose all ports with --netword=host
 container_name=ciso8583_ots_a
-
-# Check if $1 is "podman" or "docker" then use it
-if [ "$1" == "podman" ]; then
-    DOCKER=podman
-    podman --version || {
-        echo "Error: podman not found"
-        exit 1
-    }
-else
-    DOCKER=docker
-    docker --version || {
-        echo "Error: docker not found"
-        exit 1
-    }
-fi
 
 # Add custom flags
 flag=
@@ -39,7 +26,7 @@ if [ "$(docker ps -aq -f status=exited -f name=$container_name)" ] || [ "$(docke
     echo "Container $container_name exists but is not running"
     echo "Removing container $container_name to relaunch it"
     # cleanup
-    ./STOP.sh
+    ./script/STOP.sh
     echo -e "-------------------\n\n"
 fi
 if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
@@ -59,3 +46,5 @@ if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
     fi
 fi
 docker container exec -it $container_name bash
+
+cd -

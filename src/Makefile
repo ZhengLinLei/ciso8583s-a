@@ -30,4 +30,4 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 
 # Regla para limpiar
 clean:
-	rm -rf $(BUILD_DIR)/*.o $(TARGET)
+	rm -rf $(BUILD_DIR)/*.o $(TARGET) ../dist/*.tgz ../dist/*.tar

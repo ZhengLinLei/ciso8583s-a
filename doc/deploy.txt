@@ -1,5 +1,6 @@
+--- Installation
+
 HOW TO DEPLOY THE APPLICATION SERVER?
--------------------------------------
 
 WITH DOCKER (RECOMMENDED)
 
@@ -36,10 +37,39 @@ WITH DOCKER (RECOMMENDED)
 
 
 
-
 WITH PODMAN:
 
-    1. READ THE DOC PODMAN.txt
+To use PODMAN in production follow these steps to import and run container:
+
+    1. In local machine:
+
+        1.1 BUILD (./BUILD.sh <path-export-image>):  
+            
+            - ./BUILD.sh ./dist/ciso8583_ots_a.tgz
+
+            Or manually with (After docker build):
+
+            - docker image save ciso8583_ots_a | gzip > ./dist/ciso8583_ots_a.tgz
+
+        1.2 UPLOAD:
+
+            Upload the image to production
+
+    2. In remote machine:
+
+        1.2 GZIP && RUN (./PODMAN.sh <path-import-image>):
+
+            - cd dist
+            - ./PODMAN.sh ./dist/ciso8583_ots_a.tgz
+        
+            Or manually with:
+
+            - cd dist
+            - gzip -d ./ciso8583_ots_a.tgz
+            - ./STOP.sh podman
+            - podman image rm ciso8583_ots_a
+            - podman image load -i ./ciso8583_ots_a.tar
+            - podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
 
 
 
@@ -61,3 +91,34 @@ WITH NATIVE INSTALLATION
 
     5. You will see the logs in the following path:
         - /opt/Ciso8583/logs/Ciso8583.log
+
+
+
+---------------------------------
+
+--- Usage
+
+To execute the program manually you can invoke the following command:
+
+./ciso8583
+
+--
+
+To add custom port and ip:
+
+./ciso8583 9101 0.0.0.0 
+
+--
+
+To add custom logfile:
+
+./ciso8583 -o /opt/custom/logs/PARTY.log
+
+
+
+---------------------------------
+
+
+If you want to export directly to production or you want to execute the server in localhost, call script:
+
+    - ./RUNALL.sh
