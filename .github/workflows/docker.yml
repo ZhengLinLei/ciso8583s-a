@@ -33,7 +33,7 @@ jobs:
     - name: Set up Docker
       run: |
         cd ./script
-        ./BUILD.sh ./dist/ciso8583_test.tgz
+        ./BUILD.sh ./dist/ciso8583_ots_a.tgz
 
         ./RUN.sh -d
 
@@ -54,11 +54,13 @@ jobs:
 
         ./STOP.sh podman
 
-        podman image rm ciso8583_ots_a
+        cd ../dist
+
         podman image load -i ./ciso8583_ots_a.tar
         podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
 
-        podman container exec -it ciso8583_ots_a cat /opt/Ciso8583/log/Ciso8583.log
+        podman container exec ciso8583_ots_a cat /opt/Ciso8583/log/Ciso8583.log
 
+        cd ../script
         ./STOP.sh podman
 
