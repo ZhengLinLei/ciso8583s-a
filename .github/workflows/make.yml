@@ -17,8 +17,8 @@ jobs:
 
     - name: Install build dependencies
       run: |
-        apt update
-        apt install -y build-essential python3 make
+        sudo apt update
+        sudo apt install -y build-essential python3 make
 
     - name: Build server
       run: |

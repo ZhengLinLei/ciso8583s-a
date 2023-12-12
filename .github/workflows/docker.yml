@@ -1,10 +1,10 @@
 name: Docker/Podman CI
 
-on: push
-  # push:
-  #   branches: [ "master" ]
-  # pull_request:
-  #   branches: [ "master" ]
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   run:
@@ -22,14 +22,13 @@ jobs:
 
     - name: Install build dependencies
       run: |
-        apt update
-        apt install -y gnupg2 git curl
+        sudo apt update
+        sudo apt install -y gnupg2 git curl
 
-    - uses: docker-practice/actions-setup-docker@master
-      timeout-minutes: 12
+    - name: Check docker and podman
       run: |
-        service docker start
-        docker --version 
+        docker --version
+        podman --version
 
     # - name: Install Podman
     #   run: |
