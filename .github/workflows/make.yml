@@ -1,0 +1,42 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  make:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install build dependencies
+      run: |
+        apt update
+        apt install -y build-essential python3 make
+
+    - name: Build server
+      run: |
+        make
+
+    - name: Run server and tests
+      run: |
+        chmod +x ./dist/ciso8583
+        ./dist/ciso8583 -o ./ciso8583.log &
+        pid=$!
+
+        sleep 10
+
+        cd ./test
+        python3 ./client.py 1804
+        cd -
+
+        kill $pid
+        make clean
+
+        cat ./ciso8583.log

@@ -1,0 +1,78 @@
+name: Docker/Podman CI
+
+on: push
+  # push:
+  #   branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
+
+jobs:
+  run:
+
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged=true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install build dependencies
+      run: |
+        apt update
+        apt install -y gnupg2 git curl
+
+    - uses: docker-practice/actions-setup-docker@master
+      timeout-minutes: 12
+      run: |
+        service docker start
+        docker --version 
+
+    # - name: Install Podman
+    #   run: |
+    #     podman --version || {
+    #       echo -e "Installing podman\n\n"
+
+    #       /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    #       (echo; echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"') >> /root/.bashrc
+    #       eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+    #       brew install podman
+    #     }
+
+    - name: Set up Docker
+      run: |
+        cd ./script
+        ./BUILD.sh ./dist/ciso8583_test.tgz
+
+        ./RUN.sh -d
+
+        docker container exec -it ciso8583_ots_a tail /opt/Ciso8583/log/Ciso8583.log
+
+        ./STOP.sh
+
+        cd ../
+
+        ./docker/showTree.sh
+
+    # - name: Set up Podman
+    #   run: |
+    #     cd dist
+
+    #     gzip -d ./ciso8583_ots_a.tgz
+        
+    #     cd ../script
+
+    #     ./STOP.sh podman
+
+    #     podman image rm ciso8583_ots_a
+    #     podman image load -i ./ciso8583_ots_a.tar
+    #     podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
+
+    #     podman container exec -it ciso8583_ots_a cat /opt/Ciso8583/log/Ciso8583.log
+
+    #     ./STOP.sh podman
+

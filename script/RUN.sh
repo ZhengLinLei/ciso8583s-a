@@ -5,10 +5,12 @@ container_name=ciso8583_ots_a
 
 # Add custom flags
 flag=
+detach=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -d)
             flag="$flag $1"
+            detach=1
             echo "Running in detached mode"
             ;;
         --rm)
@@ -45,6 +47,10 @@ if [ ! "$(docker ps -a -q -f name=$container_name)" ]; then
         echo "Unsupported OS"
     fi
 fi
-docker container exec -it $container_name bash
+
+# Execute bash if is not -d enabled
+if [ "$detach" -eq "0" ]; then
+    docker container exec -it $container_name bash
+fi
 
 cd -
