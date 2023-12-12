@@ -23,7 +23,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt update
-        sudo apt install -y gnupg2 git curl
+        sudo apt install -y python3
 
     - name: Check docker and podman
       run: |
@@ -37,7 +37,13 @@ jobs:
 
         ./RUN.sh -d
 
-        docker container exec ciso8583_ots_a tail /opt/Ciso8583/log/Ciso8583.log
+        cd ../test
+        sleep 10
+
+        python3 ./client.py 1804
+        cd ../script
+
+        docker container exec ciso8583_ots_a cat /opt/Ciso8583/log/Ciso8583.log
 
         ./STOP.sh
 
@@ -58,6 +64,11 @@ jobs:
 
         podman image load -i ./ciso8583_ots_a.tar
         podman run -dit --name ciso8583_ots_a -p 9101:9101 -v /etc/localtime:/etc/localtime:ro -v ciso8583_ots_a_logs:/opt/Ciso8583/log ciso8583_ots_a
+
+        cd ../test
+        sleep 10
+
+        python3 ./client.py 1804
 
         podman container exec ciso8583_ots_a cat /opt/Ciso8583/log/Ciso8583.log
 
